@@ -1,0 +1,62 @@
+<?php
+
+/**
+ * @file
+ * Contains addweb_test.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_help().
+ */
+function addweb_test_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the addweb_test module.
+    case 'help.page.addweb_test':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Coding test for AddWeb Solution Company. ') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function addweb_test_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+
+  if ($form_id == 'system_site_information_settings') {
+    $config = \Drupal::config('system.site');
+    $siteapikey = ($config->get('siteapikey') != NULL) ? $config->get('siteapikey') : t('No API Key yet');
+
+    $form['site_information']['siteapikey'] = [
+      '#type' => 'textfield',
+      '#title' => t('Site API Key'),
+      '#default_value' => $siteapikey,
+    ];
+    $form['#submit'][] = 'addweb_test_form_submit';
+    if ($config->get('siteapikey')) {
+      $form['actions']['submit']['#value'] = t('Update Configuration');
+    }
+  }
+}
+
+/**
+ * Custom Submit Handler.
+ */
+function addweb_test_form_submit(array $form, FormStateInterface $form_state) {
+
+  $siteapival = $form_state->getValue('siteapikey');
+  if ($form_state->getValue('siteapikey') !== 'No API Key yet') {
+    $config = \Drupal::service('config.factory')->getEditable('system.site');
+    $config->set('siteapikey', $form_state->getValue('siteapikey'));
+    $config->save();
+    \Drupal::messenger()->addStatus(
+      t('Site API key has been saved with that value - @keyval', ['@keyval' => $form_state->getValue('siteapikey')])
+    );
+  }
+}

@@ -1,0 +1,7 @@
+addweb_test.export_jsondata:
+  path: '/page_json/{siteapikey}/{nid}'
+  defaults:
+    _controller: '\Drupal\addweb_test\Controller\ExportEventsController::data'
+    _title: 'Export Pages'
+  requirements:
+    _permission: 'access content'
